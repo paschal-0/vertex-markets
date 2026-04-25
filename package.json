@@ -1,0 +1,13 @@
+{
+  "name": "vertex-markets",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal VPS starter with a real-time ticker demo.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
