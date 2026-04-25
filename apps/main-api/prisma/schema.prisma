@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+enum UserRole {
+  TRADER
+  ADMIN
+  SUPPORT
+  FINANCE_OPS
+}
+
+enum EscrowStatus {
+  OPEN
+  FUNDED
+  RELEASED
+  DISPUTED
+  CANCELLED
+}
+
+enum PostingSide {
+  DEBIT
+  CREDIT
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+model User {
+  id             String      @id @default(cuid())
+  tenantId       String
+  email          String
+  passwordHash   String
+  twoFactorKey   String?
+  deviceFingerprint String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  tenant         Tenant      @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  roles          UserRoleMap[]
+
+  @@unique([tenantId, email])
+}
+
+model UserRoleMap {
+  id        String   @id @default(cuid())
+  userId    String
+  role      UserRole
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, role])
+}
+
+model Account {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  assetCode  String
+  balanceMinor BigInt @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tenantId, assetCode])
+}
+
+model JournalEntry {
+  id         String    @id @default(cuid())
+  tenantId   String
+  reference  String
+  createdAt  DateTime  @default(now())
+  postings   Posting[]
+
+  @@index([tenantId, createdAt])
+}
+
+model Posting {
+  id             String       @id @default(cuid())
+  journalEntryId String
+  accountId      String
+  side           PostingSide
+  amountMinor    BigInt
+  assetCode      String
+  createdAt      DateTime     @default(now())
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  account        Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+}
+
+model P2POffer {
+  id         String   @id @default(cuid())
+  tenantId   String
+  ownerUserId String
+  assetCode  String
+  side       String
+  minMinor   BigInt
+  maxMinor   BigInt
+  rate       Decimal  @db.Decimal(18, 8)
+  status     String
+  createdAt  DateTime @default(now())
+}
+
+model EscrowCase {
+  id             String       @id @default(cuid())
+  tenantId       String
+  buyerUserId    String
+  sellerUserId   String
+  offerId        String
+  status         EscrowStatus @default(OPEN)
+  disputedReason String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model AffiliateProfile {
+  id              String   @id @default(cuid())
+  tenantId        String
+  userId          String
+  referralCode    String
+  tier            String
+  totalCommissionMinor BigInt @default(0)
+  createdAt       DateTime @default(now())
+
+  @@unique([tenantId, referralCode])
+}
+
+model AffiliatePayoutBatch {
+  id          String   @id @default(cuid())
+  tenantId    String
+  periodStart DateTime
+  periodEnd   DateTime
+  totalMinor  BigInt
+  status      String
+  createdAt   DateTime @default(now())
+}
+
+model TournamentSeason {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  startsAt    DateTime
+  endsAt      DateTime
+  status      String
+  createdAt   DateTime @default(now())
+}
+
+model TournamentScore {
+  id          String   @id @default(cuid())
+  seasonId    String
+  userId      String
+  score       Decimal  @db.Decimal(18, 8)
+  rank        Int?
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  tenantId    String
+  actorUserId String?
+  action      String
+  targetType  String
+  targetId    String?
+  payload     Json
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+}
+

@@ -1,0 +1,11 @@
+node_modules
+.pnpm-store
+.next
+dist
+coverage
+.env
+.env.*
+!*.env.example
+apps/chart-api/data/*.db
+apps/chart-api/data/*.sqlite
+

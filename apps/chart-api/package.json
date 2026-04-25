@@ -1,0 +1,29 @@
+{
+  "name": "@vertex/chart-api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@vertex/config": "workspace:*",
+    "@vertex/observability": "workspace:*",
+    "@vertex/types": "workspace:*",
+    "better-sqlite3": "^11.7.0",
+    "express": "^4.21.2",
+    "ioredis": "^5.4.1",
+    "ws": "^8.18.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/express": "^5.0.0",
+    "@types/ws": "^8.5.13"
+  }
+}
+
