@@ -68,6 +68,7 @@ model Account {
   balanceMinor BigInt @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  postings   Posting[]
 
   @@index([tenantId, assetCode])
 }
@@ -172,4 +173,3 @@ model AuditLog {
 
   @@index([tenantId, createdAt])
 }
-
