@@ -1,4 +1,6 @@
+import { config as loadDotenv } from "dotenv";
 import http from "node:http";
+import { resolve } from "node:path";
 import { getLogger, recordMetric } from "@vertex/observability";
 import type { TickEvent } from "@vertex/types";
 import { createChartApiApp } from "./app";
@@ -10,6 +12,8 @@ import { RedisBus } from "./store/redis-bus";
 import { SqliteCandleStore } from "./store/sqlite-store";
 import { MarketWsGateway } from "./ws/market-ws";
 
+loadDotenv({ path: resolve(__dirname, "../../../.env") });
+loadDotenv();
 const env = loadChartApiEnv();
 const logger = getLogger();
 
@@ -75,4 +79,3 @@ bootstrap().catch((error) => {
   logger.error({ error }, "chart-api failed to start");
   process.exit(1);
 });
-

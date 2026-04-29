@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Vertex Markets | Premium Trading Platform",
+  title: "Vunex Markets | Premium Trading Platform",
   description: "Cinematic forex and OTC trading experience with a dual-system backend architecture."
 };
 
@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <header className="site-header-wrap">
           <nav className="site-header">
-            <Link href="/" className="site-brand" aria-label="Vertex Markets home">
+            <Link href="/" className="site-brand" aria-label="Vunex Markets home">
               <span className="site-logo-mark" aria-hidden="true">
                 <svg viewBox="0 0 40 40" role="img">
                   <path d="M4 4h9l7 15 7-15h9L20 36 4 4Z" fill="currentColor" />
@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </svg>
               </span>
               <span className="site-logo-text">
-                <span className="site-logo-main">VERTEX</span>
+                <span className="site-logo-main">VUNEX</span>
                 <span className="site-logo-sub">MARKETS</span>
               </span>
             </Link>
@@ -48,10 +48,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
 
             <div className="site-actions">
-              <Link href="/admin" className="nav-btn nav-btn-ghost">
+              <Link href="/signin" className="nav-btn nav-btn-ghost">
                 Login
               </Link>
-              <Link href="/trader" className="nav-btn nav-btn-primary">
+              <Link href="/signup" className="nav-btn nav-btn-primary">
                 Get Started
               </Link>
             </div>
@@ -62,3 +62,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

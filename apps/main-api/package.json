@@ -19,6 +19,7 @@
     "@vertex/observability": "workspace:*",
     "@vertex/types": "workspace:*",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "ioredis": "^5.4.1",
@@ -33,4 +34,3 @@
     "prisma": "^5.22.0"
   }
 }
-

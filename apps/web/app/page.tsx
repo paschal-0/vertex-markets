@@ -1,17 +1,23 @@
-﻿export default function HomePage() {
+import Link from "next/link";
+import { HeroImageMotion } from "./hero-image-motion";
+import { LiveMarketStrip } from "./live-market-strip";
+import { RainOverlay } from "./rain-overlay";
+
+export default function HomePage() {
   return (
     <main className="landing-shell">
+      <RainOverlay />
       <div className="landing-bg">
         {/* Hero Section */}
         <section className="hero-section">
           <div className="container hero-container">
             <div className="hero-content">
-              <h1 className="hero-title">Trade Smarter. Trade Vertex.</h1>
+              <h1 className="hero-title">Trade Smarter. Trade Vunex.</h1>
               <p className="hero-description">
                 Professional trading conditions, institutional-grade technology, and deep liquidity across global markets.
               </p>
               <div className="hero-cta">
-                <button className="btn btn-primary">Get Started</button>
+                <Link href="/signup" className="btn btn-primary">Get Started</Link>
                 <button className="btn btn-secondary">Try Demo Account</button>
               </div>
               
@@ -76,9 +82,7 @@
               </div>
             </div>
 
-            <div className="hero-image-section">
-              <img src="/Hero.png" alt="Trading Platform Hero" className="hero-image" />
-            </div>
+            <HeroImageMotion />
           </div>
         </section>
 
@@ -143,74 +147,7 @@
         {/* Market Data Section */}
         <section className="market-section" id="markets">
           <div className="container">
-            <div className="market-grid">
-              <div className="market-item">
-                <div className="market-pair">EUR/USD</div>
-                <div className="market-price">1.08946</div>
-                <div className="market-change positive">+0.47%</div>
-                <div className="market-sparkline positive" aria-hidden="true">
-                  <svg viewBox="0 0 120 32" preserveAspectRatio="none">
-                    <path className="market-sparkline-base" d="M2 24 L15 23 L28 25 L40 20 L52 21 L64 17 L76 19 L88 14 L100 15 L118 8" />
-                    <path className="market-sparkline-flow" d="M2 24 L15 23 L28 25 L40 20 L52 21 L64 17 L76 19 L88 14 L100 15 L118 8" />
-                  </svg>
-                </div>
-              </div>
-              <div className="market-item">
-                <div className="market-pair">GBP/USD</div>
-                <div className="market-price">1.27482</div>
-                <div className="market-change negative">-0.55%</div>
-                <div className="market-sparkline negative" aria-hidden="true">
-                  <svg viewBox="0 0 120 32" preserveAspectRatio="none">
-                    <path className="market-sparkline-base" d="M2 11 L14 13 L26 12 L38 16 L50 15 L62 19 L74 21 L86 23 L98 24 L118 26" />
-                    <path className="market-sparkline-flow" d="M2 11 L14 13 L26 12 L38 16 L50 15 L62 19 L74 21 L86 23 L98 24 L118 26" />
-                  </svg>
-                </div>
-              </div>
-              <div className="market-item">
-                <div className="market-pair">XAU/USD</div>
-                <div className="market-price">2,384.66</div>
-                <div className="market-change positive">+0.62%</div>
-                <div className="market-sparkline positive" aria-hidden="true">
-                  <svg viewBox="0 0 120 32" preserveAspectRatio="none">
-                    <path className="market-sparkline-base" d="M2 23 L16 20 L30 21 L44 16 L58 19 L72 14 L86 15 L100 10 L110 12 L118 8" />
-                    <path className="market-sparkline-flow" d="M2 23 L16 20 L30 21 L44 16 L58 19 L72 14 L86 15 L100 10 L110 12 L118 8" />
-                  </svg>
-                </div>
-              </div>
-              <div className="market-item">
-                <div className="market-pair">USD/JPY</div>
-                <div className="market-price">156.743</div>
-                <div className="market-change negative">-0.21%</div>
-                <div className="market-sparkline negative" aria-hidden="true">
-                  <svg viewBox="0 0 120 32" preserveAspectRatio="none">
-                    <path className="market-sparkline-base" d="M2 10 L16 12 L30 11 L44 15 L58 13 L72 17 L86 16 L100 19 L110 18 L118 21" />
-                    <path className="market-sparkline-flow" d="M2 10 L16 12 L30 11 L44 15 L58 13 L72 17 L86 16 L100 19 L110 18 L118 21" />
-                  </svg>
-                </div>
-              </div>
-              <div className="market-item">
-                <div className="market-pair">BTC/USD</div>
-                <div className="market-price">67,842.10</div>
-                <div className="market-change positive">+1.09%</div>
-                <div className="market-sparkline positive" aria-hidden="true">
-                  <svg viewBox="0 0 120 32" preserveAspectRatio="none">
-                    <path className="market-sparkline-base" d="M2 25 L14 24 L26 23 L38 22 L50 20 L62 19 L74 15 L86 13 L100 11 L118 7" />
-                    <path className="market-sparkline-flow" d="M2 25 L14 24 L26 23 L38 22 L50 20 L62 19 L74 15 L86 13 L100 11 L118 7" />
-                  </svg>
-                </div>
-              </div>
-              <div className="market-item">
-                <div className="market-pair">US OIL</div>
-                <div className="market-price">78.245</div>
-                <div className="market-change negative">-0.15%</div>
-                <div className="market-sparkline negative" aria-hidden="true">
-                  <svg viewBox="0 0 120 32" preserveAspectRatio="none">
-                    <path className="market-sparkline-base" d="M2 14 L14 13 L26 15 L38 14 L50 17 L62 16 L74 18 L86 20 L100 19 L118 22" />
-                    <path className="market-sparkline-flow" d="M2 14 L14 13 L26 15 L38 14 L50 17 L62 16 L74 18 L86 20 L100 19 L118 22" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            <LiveMarketStrip />
           </div>
         </section>
 
@@ -273,10 +210,10 @@
             <div className="cta-panel">
               <div className="cta-copy">
                 <h2>Ready to Elevate Your Trading?</h2>
-                <p>Join Vertex Markets today and trade the world&apos;s markets with confidence, technology, and transparency.</p>
+                <p>Join Vunex Markets today and trade the world&apos;s markets with confidence, technology, and transparency.</p>
               </div>
               <div className="cta-actions">
-                <button className="btn btn-primary">Get Started</button>
+                <Link href="/signup" className="btn btn-primary">Get Started</Link>
                 <p>or <a href="#demo">Try Demo Account</a></p>
               </div>
               <div className="cta-visual-slot" aria-hidden="true">
@@ -289,3 +226,6 @@
     </main>
   );
 }
+
+
+
