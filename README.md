@@ -1,4 +1,4 @@
-# Vertex Markets Platform
+# Vunex Markets Platform
 
 Dual-system fintech architecture scaffold:
 - `apps/main-api`: business logic API (auth, wallets, P2P escrow, affiliates, tournaments, admin).
@@ -57,3 +57,4 @@ Implemented in this commit:
 - Redis publish + SQLite candle persistence.
 - Next.js trader/admin foundational UI.
 - Unit tests for candle aggregation and escrow state transitions.
+

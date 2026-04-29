@@ -1,0 +1,25 @@
+
+> @vertex/web@0.1.0 dev C:\Users\LENOVO\Documents\vertex-markets\apps\web
+> next dev -p 3000
+
+   ▲ Next.js 15.5.15
+   - Local:        http://localhost:3000
+   - Network:      http://172.23.240.1:3000
+   - Experiments (use with caution):
+     ⨯ devtoolSegmentExplorer
+
+ ✓ Starting...
+ ✓ Ready in 6s
+ ○ Compiling / ...
+ ✓ Compiled / in 11.9s (595 modules)
+ GET / 200 in 13771ms
+ GET / 200 in 1020ms
+ GET / 200 in 1116ms
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 1521ms (114 modules)
+ ○ Compiling /trader ...
+ ✓ Compiled /trader in 1473ms (595 modules)
+ GET /trader 200 in 2102ms
+C:\Users\LENOVO\Documents\vertex-markets\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @vertex/web@0.1.0 dev: `next dev -p 3000`
+Exit status 4294967295

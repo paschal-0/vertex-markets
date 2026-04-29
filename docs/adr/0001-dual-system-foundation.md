@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-Vertex requires low-latency market fanout without coupling chart throughput to business workflows.
+Vunex requires low-latency market fanout without coupling chart throughput to business workflows.
 
 ## Decision
 - Split runtime into two APIs:
@@ -17,4 +17,5 @@ Vertex requires low-latency market fanout without coupling chart throughput to b
 - Horizontal scaling for chart workers is independent from account/wallet services.
 - Cross-service event contracts must remain stable (`TickEvent`, `CandleEvent`, etc).
 - Financial consistency remains Postgres-first; fanout/cache are eventual.
+
 

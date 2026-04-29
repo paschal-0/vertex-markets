@@ -1,4 +1,4 @@
-# Vertex Markets V1 Delivery Plan (Execution-Ready)
+# Vunex Markets V1 Delivery Plan (Execution-Ready)
 
 ## 1) Product Direction and Client Alignment
 
@@ -256,4 +256,5 @@ The delivery must match the client's mockups and stated backend architecture.
 - Wallet model remains internal ledger + external provider execution.
 - Multi-tenant logical isolation from day 1.
 - Web-first release in V1.
+
 
