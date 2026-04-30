@@ -34,7 +34,15 @@ export function createMainApiApp(env: MainApiEnv) {
     res.json({ ok: true, service: "main-api", ts: Date.now() });
   });
 
-  app.use("/api/v1/auth", createAuthRouter(tokenConfig));
+  app.use(
+    "/api/v1/auth",
+    createAuthRouter(tokenConfig, {
+      apiKey: env.RESEND_API_KEY,
+      fromEmail: env.RESEND_FROM_EMAIL,
+      brandName: env.OTP_EMAIL_BRAND,
+      isProduction: env.NODE_ENV === "production"
+    })
+  );
   app.use("/api/v1/users", authMiddleware(tokenConfig), requireTenant, usersRouter);
   app.use("/api/v1/wallet", authMiddleware(tokenConfig), requireTenant, walletRouter);
   app.use("/api/v1/p2p", authMiddleware(tokenConfig), requireTenant, p2pRouter);

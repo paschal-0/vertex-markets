@@ -4,8 +4,9 @@ import { issueAccessToken, issueRefreshToken, type SessionIdentity, type TokenCo
 import type { Role } from "@vertex/types";
 import { z } from "zod";
 import { prisma } from "../../db/prisma";
-import { createAuthChallenge, verifyAuthChallenge, type AuthChallengePurpose } from "../../services/auth-challenge-store";
+import { createAuthChallenge, resendAuthChallenge, verifyAuthChallenge, type AuthChallengePurpose } from "../../services/auth-challenge-store";
 import { hashPassword, verifyPassword } from "../../services/password";
+import { sendOtpEmail, type OtpEmailConfig } from "../../services/otp-email";
 import { randomUUID } from "crypto";
 
 const registerSchema = z.object({
@@ -25,6 +26,11 @@ const otpVerifySchema = z.object({
   challengeId: z.string().uuid(),
   code: z.string().regex(/^\d{6}$/),
   purpose: z.enum(["login", "signup"]).default("login")
+});
+
+const otpResendSchema = z.object({
+  challengeId: z.string().uuid(),
+  purpose: z.enum(["login", "signup"])
 });
 
 const forgotPasswordSchema = z.object({
@@ -122,8 +128,14 @@ function mapOtpPurposeToInternal(purpose: "login" | "signup"): AuthChallengePurp
   return purpose === "signup" ? "SIGNUP_OTP" : "LOGIN_OTP";
 }
 
-export function createAuthRouter(tokenConfig: TokenConfig) {
+export function createAuthRouter(tokenConfig: TokenConfig, otpEmailConfig?: OtpEmailConfig) {
   const router = Router();
+  const resolvedOtpEmailConfig: OtpEmailConfig = otpEmailConfig ?? {
+    apiKey: process.env.RESEND_API_KEY,
+    fromEmail: process.env.RESEND_FROM_EMAIL || "Vunex Markets <no-reply@vunex.live>",
+    brandName: process.env.OTP_EMAIL_BRAND || "Vunex Markets",
+    isProduction: process.env.NODE_ENV === "production"
+  };
 
   router.post("/register", async (req, res) => {
     const parsed = registerSchema.safeParse(req.body);
@@ -180,7 +192,12 @@ export function createAuthRouter(tokenConfig: TokenConfig) {
         ttlSeconds: 600
       });
 
-      console.log(`📧 SIGNUP OTP for ${email}: ${otp.code}`);
+      await sendOtpEmail(resolvedOtpEmailConfig, {
+        to: email,
+        code: otp.code,
+        purpose: "signup",
+        expiresInSeconds: otp.expiresInSeconds
+      });
 
       res.status(201).json({
         ok: true,
@@ -249,7 +266,12 @@ export function createAuthRouter(tokenConfig: TokenConfig) {
         ttlSeconds: 300
       });
 
-      console.log(`🔐 LOGIN OTP for ${email}: ${otp.code}`);
+      await sendOtpEmail(resolvedOtpEmailConfig, {
+        to: email,
+        code: otp.code,
+        purpose: "login",
+        expiresInSeconds: otp.expiresInSeconds
+      });
 
       res.json({
         ok: true,
@@ -319,6 +341,55 @@ export function createAuthRouter(tokenConfig: TokenConfig) {
       });
     } catch (error) {
       res.status(500).json({ ok: false, error: "OTP verification failed.", details: String(error) });
+    }
+  });
+
+  router.post("/otp/resend", async (req, res) => {
+    const parsed = otpResendSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ ok: false, error: "Invalid request payload.", details: parsed.error.flatten() });
+      return;
+    }
+
+    const expectedPurpose = mapOtpPurposeToInternal(parsed.data.purpose);
+    const ttlSeconds = parsed.data.purpose === "signup" ? 600 : 300;
+    const refreshed = resendAuthChallenge({
+      challengeId: parsed.data.challengeId,
+      expectedPurpose,
+      ttlSeconds
+    });
+
+    if (!refreshed.ok) {
+      res.status(400).json({ ok: false, error: otpErrorMessage(refreshed.reason) });
+      return;
+    }
+
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: refreshed.challenge.userId }
+      });
+      if (!user) {
+        res.status(404).json({ ok: false, error: "User not found." });
+        return;
+      }
+
+      await sendOtpEmail(resolvedOtpEmailConfig, {
+        to: user.email,
+        code: refreshed.code,
+        purpose: parsed.data.purpose,
+        expiresInSeconds: refreshed.expiresInSeconds
+      });
+
+      res.json({
+        ok: true,
+        data: {
+          challengeId: refreshed.challengeId,
+          expiresInSeconds: refreshed.expiresInSeconds,
+          otpCode: isDevMode() ? refreshed.code : undefined
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: "Failed to resend OTP.", details: String(error) });
     }
   });
 
@@ -443,6 +514,13 @@ export function createAuthRouter(tokenConfig: TokenConfig) {
         userId: user.id,
         purpose: "RESET_PASSWORD",
         ttlSeconds: 900
+      });
+
+      await sendOtpEmail(resolvedOtpEmailConfig, {
+        to: email,
+        code: reset.code,
+        purpose: "reset_password",
+        expiresInSeconds: reset.expiresInSeconds
       });
 
       res.json({

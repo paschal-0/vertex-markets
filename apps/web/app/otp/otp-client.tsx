@@ -41,6 +41,7 @@ export function OtpClient({ challengeId, purpose, email }: OtpClientProps) {
   const [countdown, setCountdown] = useState(30);
   const [status, setStatus] = useState<OtpStatus | null>(null);
   const [loading, setLoading] = useState(false);
+  const [activeChallengeId, setActiveChallengeId] = useState(challengeId);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
   useEffect(() => {
@@ -74,7 +75,7 @@ export function OtpClient({ challengeId, purpose, email }: OtpClientProps) {
     event.preventDefault();
     const code = digits.join("");
 
-    if (!challengeId) {
+    if (!activeChallengeId) {
       setStatus({ ok: false, message: "Missing challenge ID. Return and request a new code." });
       return;
     }
@@ -89,7 +90,7 @@ export function OtpClient({ challengeId, purpose, email }: OtpClientProps) {
       const response = await fetch(`${apiBaseUrl}/api/v1/auth/otp/verify`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ challengeId, code, purpose })
+        body: JSON.stringify({ challengeId: activeChallengeId, code, purpose })
       });
 
       const payload = (await response.json()) as { ok: boolean; error?: string };
@@ -107,10 +108,43 @@ export function OtpClient({ challengeId, purpose, email }: OtpClientProps) {
     }
   }
 
-  function onResend() {
+  async function onResend() {
     if (countdown > 0) return;
-    setCountdown(30);
-    setStatus({ ok: true, message: "A new code has been requested. Check your email." });
+    if (!activeChallengeId) {
+      setStatus({ ok: false, message: "Missing challenge ID. Return and request a new code." });
+      return;
+    }
+
+    setLoading(true);
+    setStatus(null);
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/v1/auth/otp/resend`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ challengeId: activeChallengeId, purpose })
+      });
+
+      const payload = (await response.json()) as {
+        ok: boolean;
+        error?: string;
+        data?: { challengeId?: string };
+      };
+
+      if (!response.ok || !payload.ok || !payload.data?.challengeId) {
+        setStatus({ ok: false, message: payload.error || "Failed to resend code." });
+        return;
+      }
+
+      setActiveChallengeId(payload.data.challengeId);
+      setDigits(["", "", "", "", "", ""]);
+      setCountdown(30);
+      inputsRef.current[0]?.focus();
+      setStatus({ ok: true, message: "A new code has been sent to your email." });
+    } catch {
+      setStatus({ ok: false, message: "Unable to reach auth server." });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -165,8 +199,8 @@ export function OtpClient({ challengeId, purpose, email }: OtpClientProps) {
                 </button>
 
                 <div className="flex flex-col items-center gap-2">
-                  <button className={`text-[13px] font-semibold uppercase tracking-[0.05em] transition-colors ${countdown > 0 ? "cursor-not-allowed text-slate-400" : "text-blue-300 hover:text-blue-500"}`} type="button" onClick={onResend} disabled={countdown > 0}>
-                    {countdown > 0 ? `RESEND CODE (00:${String(countdown).padStart(2, "0")})` : "RESEND CODE"}
+                  <button className={`text-[13px] font-semibold uppercase tracking-[0.05em] transition-colors ${countdown > 0 || loading ? "cursor-not-allowed text-slate-400" : "text-blue-300 hover:text-blue-500"}`} type="button" onClick={onResend} disabled={countdown > 0 || loading}>
+                    {loading ? "SENDING..." : countdown > 0 ? `RESEND CODE (00:${String(countdown).padStart(2, "0")})` : "RESEND CODE"}
                   </button>
                   <Link className="text-[13px] text-slate-600 underline decoration-slate-800 underline-offset-4 transition-colors hover:text-blue-500" href={purpose === "signup" ? "/signup" : "/signin"}>
                     Change email address

@@ -114,3 +114,43 @@ export function verifyAuthChallenge(input: {
   return { ok: true, challenge };
 }
 
+export function resendAuthChallenge(input: {
+  challengeId: string;
+  expectedPurpose: AuthChallengePurpose;
+  ttlSeconds?: number;
+  maxAttempts?: number;
+}):
+  | { ok: true; challengeId: string; code: string; expiresInSeconds: number; challenge: AuthChallenge }
+  | { ok: false; reason: "not_found" | "expired" | "consumed" | "wrong_purpose" } {
+  const now = Date.now();
+  const challenge = challengeStore.get(input.challengeId);
+  if (!challenge) {
+    return { ok: false, reason: "not_found" };
+  }
+
+  if (challenge.consumedAt) {
+    challengeStore.delete(challenge.id);
+    return { ok: false, reason: "consumed" };
+  }
+
+  if (challenge.expiresAt <= now) {
+    challengeStore.delete(challenge.id);
+    return { ok: false, reason: "expired" };
+  }
+
+  if (challenge.purpose !== input.expectedPurpose) {
+    return { ok: false, reason: "wrong_purpose" };
+  }
+
+  challengeStore.delete(challenge.id);
+  const refreshed = createAuthChallenge({
+    tenantId: challenge.tenantId,
+    userId: challenge.userId,
+    purpose: challenge.purpose,
+    ttlSeconds: input.ttlSeconds,
+    maxAttempts: input.maxAttempts
+  });
+
+  const nextChallenge = challengeStore.get(refreshed.challengeId)!;
+  return { ok: true, ...refreshed, challenge: nextChallenge };
+}
